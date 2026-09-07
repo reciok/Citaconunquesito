@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>pedir cita con un quesito</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #fff1f7, #ffe0ec, #fff7dc);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 850px;
+      background: rgba(255,255,255,0.92);
+      border-radius: 30px;
+      padding: 35px;
+      box-shadow: 0 20px 60px rgba(150, 70, 100, 0.2);
+      text-align: center;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      color: #d6336c;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 25px;
+      font-size: 1.05rem;
+    }
+
+    .intro {
+      background: #fff5f8;
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .day-name {
+      font-weight: bold;
+      color: #d6336c;
+      padding: 10px 0;
+    }
+
+    .day {
+      border: none;
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: 0.2s;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.07);
+    }
+
+    .day:hover {
+      transform: translateY(-4px) scale(1.04);
+      background: #ffe3ed;
+    }
+
+    .day.selected {
+      background: #d6336c;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .day.disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .month {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .month button {
+      border: none;
+      background: #d6336c;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    .month h2 {
+      color: #444;
+    }
+
+    .result {
+      display: none;
+      margin-top: 30px;
+      background: linear-gradient(135deg, #fff0f6, #fff9e8);
+      padding: 25px;
+      border-radius: 22px;
+      animation: aparecer 0.5s ease;
+    }
+
+    .result h2 {
+      color: #d6336c;
+      margin-bottom: 15px;
+    }
+
+    .result p {
+      line-height: 1.7;
+      color: #444;
+    }
+
+    .big-button {
+      margin-top: 20px;
+      padding: 15px 28px;
+      border: none;
+      border-radius: 50px;
+      background: #d6336c;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .big-button:hover {
+      transform: scale(1.05);
+      background: #b92759;
+    }
+
+    .secret {
+      display: none;
+      margin-top: 20px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #9c36b5;
+    }
+
+    .cheese {
+      position: fixed;
+      font-size: 2rem;
+      animation: caer 3s linear forwards;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    @keyframes aparecer {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes caer {
+      from {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    @media(max-width:600px) {
+      .container {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .day {
+        padding: 10px 3px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>🧀 pedir cita con un quesito 💃</h1>
+
+  <div class="subtitle">
+    Sistema oficial de solicitud de citas para Ari Álvarez
+  </div>
+
+  <div class="intro">
+    <strong>Ari Álvarez</strong>, de Torrejón, ha sido seleccionada
+    para una misión de máxima importancia. 🕵️‍♂️
+    <br><br>
+    Selecciona un día disponible para comprobar si existe
+    alguna posibilidad de conseguir una cita.
+  </div>
+
+  <div class="month">
+    <button onclick="cambiarMes(-1)">‹</button>
+    <h2 id="monthTitle"></h2>
+    <button onclick="cambiarMes(1)">›</button>
+  </div>
+
+  <div class="calendar" id="calendar"></div>
+
+  <div class="result" id="result">
+    <h2 id="resultTitle"></h2>
+    <p id="resultText"></p>
+
+    <button class="big-button" onclick="aceptarCita()">
+      💃 Aceptar la cita
+    </button>
+
+    <div class="secret" id="secret">
+      🧀 ¡ENHORABUENA! 🧀
+      <br><br>
+      Has desbloqueado una cita con el misterioso quesito.
+      <br><br>
+      Condición indispensable:
+      <br>
+      💃 Bailar muchísimo.
+      <br><br>
+      📍 Torrejón
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+  const calendar = document.getElementById("calendar");
+  const monthTitle = document.getElementById("monthTitle");
+  const result = document.getElementById("result");
+  const resultTitle = document.getElementById("resultTitle");
+  const resultText = document.getElementById("resultText");
+  const secret = document.getElementById("secret");
+
+  let fecha = new Date();
+  let mesActual = fecha.getMonth();
+  let añoActual = fecha.getFullYear();
+
+  const meses = [
+    "Enero", "Febrero", "Marzo", "Abril",
+    "Mayo", "Junio", "Julio", "Agosto",
+    "Septiembre", "Octubre", "Noviembre", "Diciembre"
+  ];
+
+  function generarCalendario() {
+
+    calendar.innerHTML = "";
+
+    monthTitle.textContent =
+      meses[mesActual] + " " + añoActual;
+
+    const nombresDias =
+      ["L", "M", "X", "J", "V", "S", "D"];
+
+    nombresDias.forEach(dia => {
+      const elemento = document.createElement("div");
+      elemento.className = "day-name";
+      elemento.textContent = dia;
+      calendar.appendChild(elemento);
+    });
+
+    let primerDia =
+      new Date(añoActual, mesActual, 1).getDay();
+
+    // Convertir domingo = 0 a formato lunes = 0
+    primerDia = (primerDia + 6) % 7;
+
+    const diasMes =
+      new Date(añoActual, mesActual + 1, 0).getDate();
+
+    for (let i = 0; i < primerDia; i++) {
+      const vacio = document.createElement("div");
+      calendar.appendChild(vacio);
+    }
+
+    for (let dia = 1; dia <= diasMes; dia++) {
+
+      const boton = document.createElement("button");
+
+      boton.className = "day";
+      boton.textContent = dia;
+
+      boton.onclick = () => seleccionarDia(dia);
+
+      calendar.appendChild(boton);
+    }
+  }
+
+  function cambiarMes(direccion) {
+
+    mesActual += direccion;
+
+    if (mesActual > 11) {
+      mesActual = 0;
+      añoActual++;
+    }
+
+    if (mesActual < 0) {
+      mesActual = 11;
+      añoActual--;
+    }
+
+    generarCalendario();
+
+    result.style.display = "none";
+  }
+
+  function seleccionarDia(dia) {
+
+    document.querySelectorAll(".day")
+      .forEach(d => d.classList.remove("selected"));
+
+    event.target.classList.add("selected");
+
+    const fechaElegida =
+      dia + " de " + meses[mesActual] +
+      " de " + añoActual;
+
+    result.style.display = "block";
+
+    resultTitle.textContent =
+      "📅 Solicitud para el " + fechaElegida;
+
+    resultText.innerHTML = `
+      Parece que el día <strong>${fechaElegida}</strong>
+      está disponible. 👀
+      <br><br>
+      Analizando compatibilidad...
+      <br>
+      💃 Nivel de baile: <strong>MUY ALTO</strong>
+      <br>
+      🧀 Nivel de quesito: <strong>EXCELENTE</strong>
+      <br>
+      📍 Distancia hasta Torrejón: <strong>aceptable</strong>
+      <br><br>
+      Resultado del sistema:
+      <strong>TIENE PINTA DE SER UNA BUENA CITA.</strong>
+    `;
+
+    secret.style.display = "none";
+
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: "smooth"
+    });
+  }
+
+  function aceptarCita() {
+
+    secret.style.display = "block";
+
+    lanzarQuesitos();
+
+    document.querySelector(".big-button")
+      .textContent = "🧀 CITA CONFIRMADA 🧀";
+  }
+
+  function lanzarQuesitos() {
+
+    for (let i = 0; i < 25; i++) {
+
+      setTimeout(() => {
+
+        const queso = document.createElement("div");
+
+        queso.className = "cheese";
+        queso.textContent = ["🧀", "💃", "❤️", "✨"]
+          [Math.floor(Math.random() * 4)];
+
+        queso.style.left =
+          Math.random() * 100 + "vw";
+
+        queso.style.animationDuration =
+          (2 + Math.random() * 3) + "s";
+
+        document.body.appendChild(queso);
+
+        setTimeout(() => queso.remove(), 5000);
+
+      }, i * 100);
+    }
+  }
+
+  generarCalendario();
+
+</script>
+
+</body>
+</html>
